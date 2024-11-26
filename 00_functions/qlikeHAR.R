@@ -6,11 +6,16 @@ qlikeHAR <- function(X, y, S) {
     error <- S(x = haty, y = y)
     return(sum(error, na.rm = TRUE)) # na.rm here is important !!!
   }
-  
   X <- as.matrix(X)
+  
+  # Start time
+  t_start <- Sys.time()
   
   # Fit the model using OLS as the initial guess
   ols_model <- stats::lm(y ~ X)
+  
+  # End time OLS
+  t_end_ols <- Sys.time()
   
   # Initial guess for parameters from OLS
   initial_params <- coefficients(ols_model) %>% as.numeric()
@@ -30,6 +35,21 @@ qlikeHAR <- function(X, y, S) {
   # Coefficients
   coef <- optimal_params
   
-  return(list(x_rc = x_rc, coef = coef, ols_model = coefficients(ols_model)))
+  # End time
+  t_end <- Sys.time()
+  
+  # Calculate computation time in seconds
+  time_taken_ols <- as.numeric(difftime(t_end_ols, t_start, units = "secs"))
+  time_taken <- as.numeric(difftime(t_end, t_start, units = "secs"))
+  
+  return(
+    list(
+      x_rc = x_rc, 
+      coef = coef, 
+      ols_model = coefficients(ols_model), 
+      time_taken_ols = time_taken_ols,
+      time_taken = time_taken
+      )
+    )
 }
 

@@ -1,4 +1,4 @@
-paneldmw <- function(pdat, ml = NULL) {
+paneldmw <- function(pdat, ml = 10) {
   # Convert the data frame to a panel data frame
   #pdat <- plm::pdata.frame(dif, index = sym)
   # Fit the pooled model
@@ -12,16 +12,18 @@ paneldmw <- function(pdat, ml = NULL) {
   return(as.numeric(result))
 }
 
-compute_statistics <- function(symbol_data) {
+compute_statistics <- function(symbol_data, l=10) {
   # Calculate qlike_loss_diff
   qlike_loss_diff <- symbol_data$lossdifqlike
   dmqlike <- lm(qlike_loss_diff ~ 1)
-  qlike_stats <- lmtest::coeftest(dmqlike, vcov = vcovHAC(dmqlike))
+  #qlike_stats <- lmtest::coeftest(dmqlike, vcov = vcovHAC(dmqlike))
+  qlike_stats <- lmtest::coeftest(dmqlike, vcov = sandwich::NeweyWest(dmqlike, lag=l))
   
   # Calculate mse_loss_diff
   mse_loss_diff <- symbol_data$lossdiffmse
   dmmse <- lm(mse_loss_diff ~ 1)
-  mse_stats <- lmtest::coeftest(dmmse, vcov = sandwich::vcovHAC(dmmse))
+  #mse_stats <- lmtest::coeftest(dmmse, vcov = sandwich::vcovHAC(dmmse))
+  mse_stats <- lmtest::coeftest(dmmse, vcov = sandwich::NeweyWest(dmmse, lag=l))
   
   # Return results
   list(
@@ -87,7 +89,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_har$coef %*% (c(1, tail(data_har, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_har$ols_model %*% (c(1, tail(data_har, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HAR", 
-        horizon = "1day"
+        horizon = "1day", 
+        time = mod_har$time_taken, 
+        timeOLS = mod_har$time_taken_ols
       )
     
     ## week ============================
@@ -100,7 +104,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_har_w$coef %*% (c(1, tail(data_har, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_har_w$ols_model %*% (c(1, tail(data_har, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HAR", 
-        horizon = "1week"
+        horizon = "1week", 
+        time = mod_har_w$time_taken, 
+        timeOLS = mod_har_w$time_taken_ols
       )
     
     ## month ===========================
@@ -117,7 +123,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_har_m$coef %*% (c(1, tail(data_har, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_har_m$ols_model %*% (c(1, tail(data_har, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HAR", 
-        horizon = "1month"
+        horizon = "1month", 
+        time = mod_har_m$time_taken, 
+        timeOLS = mod_har_m$time_taken_ols
       )
     
     # HARQ ======================================================================
@@ -139,7 +147,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_harq$coef %*% (c(1, tail(data_harq, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_harq$ols_model %*% (c(1, tail(data_harq, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HARQ", 
-        horizon = "1day"
+        horizon = "1day",
+        time = mod_harq$time_taken, 
+        timeOLS = mod_harq$time_taken_ols
       )
     
     ## week ============================
@@ -151,7 +161,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_harq_w$coef %*% (c(1, tail(data_harq, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_harq_w$ols_model %*% (c(1, tail(data_harq, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HARQ", 
-        horizon = "1week"
+        horizon = "1week", 
+        time = mod_harq_w$time_taken, 
+        timeOLS = mod_harq_w$time_taken_ols
       )
     
     ## month ===========================
@@ -163,7 +175,9 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_harq_m$coef %*% (c(1, tail(data_harq, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_harq_m$ols_model %*% (c(1, tail(data_harq, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "HARQ", 
-        horizon = "1month"
+        horizon = "1month", 
+        time = mod_harq_m$time_taken, 
+        timeOLS = mod_harq_m$time_taken_ols
       )
     
     
@@ -187,31 +201,37 @@ do_predictions <- function(rv, rq, good, bad, win = 1000) {
         qlikeHAR = mod_shar$coef %*% (c(1, tail(data_shar, 1)) %>% as.numeric()) %>% as.numeric(), 
         mseHAR = mod_shar$ols_model %*% (c(1, tail(data_shar, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "SHAR", 
-        horizon = "1day"
-      )
+        horizon = "1day",
+        time = mod_shar$time_taken,
+        timeOLS = mod_shar$time_taken_ols
+        )
     
     ## week ============================
-    mod_harq_w <- qlikeHAR(X=data_shar[1:(win-1),], y=data_shar[2:win,2], S=S)
+    mod_shar_w <- qlikeHAR(X=data_shar[1:(win-1),], y=data_shar[2:win,2], S=S)
     shar_1wa <- # one week ahead SHAR
       tibble(
         date=d_, 
         realization = xf_w, 
-        qlikeHAR = mod_harq_w$coef %*% (c(1, tail(data_shar, 1)) %>% as.numeric()) %>% as.numeric(), 
-        mseHAR = mod_harq_w$ols_model %*% (c(1, tail(data_shar, 1))%>% as.numeric())  %>% as.numeric(), 
+        qlikeHAR = mod_shar_w$coef %*% (c(1, tail(data_shar, 1)) %>% as.numeric()) %>% as.numeric(), 
+        mseHAR = mod_shar_w$ols_model %*% (c(1, tail(data_shar, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "SHAR", 
-        horizon = "1week"
+        horizon = "1week", 
+        time = mod_shar_w$time_taken,
+        timeOLS = mod_shar_w$time_taken_ols
       )
     
     ## month ===========================
-    mod_harq_m <- qlikeHAR(X=data_shar[1:(win-1),], y=data_shar[2:win,3], S=S)
+    mod_shar_m <- qlikeHAR(X=data_shar[1:(win-1),], y=data_shar[2:win,3], S=S)
     shar_1ma <- # one month ahead SHAR
       tibble(
         date=d_, 
         realization = xf_m, 
-        qlikeHAR = mod_harq_m$coef %*% (c(1, tail(data_shar, 1)) %>% as.numeric()) %>% as.numeric(), 
-        mseHAR = mod_harq_m$ols_model %*% (c(1, tail(data_shar, 1))%>% as.numeric())  %>% as.numeric(), 
+        qlikeHAR = mod_shar_m$coef %*% (c(1, tail(data_shar, 1)) %>% as.numeric()) %>% as.numeric(), 
+        mseHAR = mod_shar_m$ols_model %*% (c(1, tail(data_shar, 1))%>% as.numeric())  %>% as.numeric(), 
         model = "SHAR", 
-        horizon = "1month"
+        horizon = "1month",
+        time = mod_shar_m$time_taken,
+        timeOLS = mod_shar_m$time_taken_ols
       )
     
     onedayahead   <-  bind_rows(har_1da, harq_1da, shar_1da)

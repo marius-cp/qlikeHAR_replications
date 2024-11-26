@@ -120,13 +120,16 @@ avglosses <-
   summarise(mean(value, na.rm=T)) %>% arrange(sym)
 avglosses
 
+
 # Perform the operations
 results <- losses %>% 
+  #filter(sym=="AAPL",win==2000) %>% 
   group_by(sym, win, horizon, model) %>% 
   group_map(~ compute_statistics(.x), .keep = TRUE) %>% 
   bind_rows()
 
 results
+
 saveRDS(results, "DMW_results_individual_5min.rds")
 
 
@@ -153,14 +156,14 @@ paneldmw_ <-
         data.frame(sym,dif=lossdifqlike), 
         index = "sym"
       ), 
-      ml=5
+      ml=10
     ), 
     mse_statistic = paneldmw(
       plm::pdata.frame(
         data.frame(sym,dif=lossdiffmse), 
         index = "sym"
       ), 
-      ml=5
+      ml=10
     )
   ) 
 paneldmw_
@@ -179,6 +182,7 @@ color_scale <- scale_color_manual(
   ), 
   drop = FALSE, 
 )
+
 
 infoinconc <- 
   bind_rows(
@@ -376,14 +380,14 @@ paneldmw_ <-
         data.frame(sym,dif=lossdifqlike), 
         index = "sym"
       ), 
-      ml=5
+      ml=10
     ), 
     mse_statistic = paneldmw(
       plm::pdata.frame(
         data.frame(sym,dif=lossdiffmse), 
         index = "sym"
       ), 
-      ml=5
+      ml=10
     )
   ) 
 paneldmw_
@@ -518,107 +522,87 @@ plotdata %>%
 ggsave("fig_capire_dm_1min.pdf", width = 8, height = 8)
 ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_capire_dm_1min.pdf", width = 8, height = 8)
 
+# comp time ----
 
-# appl test ----
-# test qlike function
-aapl <- dat %>% filter(Symbol=="AAPL")
+## 5 min ----
+fcasts <- readRDS("./fcasts_capire_5min.rds")
 
-rv <- xts(sqrt(aapl$rv5), order.by = aapl$date) # use matrix of xts as input
-win=1000; t=win+1
-rv_ <- as.matrix(rv[(t-win):(t-1),])
-d_ <- index(rv)[t]
-xf <- as.numeric(rv[t])
+fcasts %>% 
+  filter(date>="2011-01-01", date<"2024-01-01") %>% 
+  group_by(win,model,horizon) %>% 
+  summarise(mean(time),mean(timeOLS))
 
+fcasts %>% 
+  filter(date>="2011-01-01", date<"2024-01-01", model!="HARQ") %>% 
+  select(date, win, model, horizon, time, timeOLS) %>% 
+  pivot_longer(cols = time:timeOLS) %>% 
+  mutate(name=ifelse(name=="time","QLIKE Solution","OLS SE Solution"))%>% 
+  mutate(
+    horizon = ifelse(
+      horizon ==  "1day", 
+      "a) one-day-ahead", 
+      ifelse(
+        horizon ==  "1week", 
+        "b) one-week-ahead", 
+        "c) one-month-ahead")
+    )
+  ) %>% 
+  ggplot(aes(x=factor(win), y=(value), color=name))+
+  geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0)) +
+  facet_nested(model~horizon)+
+  scale_y_log10()+
+  coord_cartesian(ylim = c(1e-4,.0225))+
+  xlab("length of estimation window")+
+  ylab("time in seconds")+
+  theme_bw()+
+  theme(
+    legend.position = "bottom", 
+    legend.title  = element_blank(), 
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )+
+  scale_color_manual(values = c("coral", "purple"))
 
-# HAR
-## har ----
-data_har <- data.frame(
-  #date= ymd(aapl$date),
-  "rv" = aapl$rv5 %>% sqrt(), 
-  rvw = RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=5, fill=NA), 
-  rvm = RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=22, fill=NA)
-) %>% tidyr::drop_na()
-data_har
+ggsave("fig_capire_estimationtime_5min.pdf", width = 8, height = 6)
+ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_capire_estimationtime_5min.pdf", width = 8, height = 6)
 
-### har daily ----
-mod_har <- qlikeHAR(X=data_har[1:(1000-1),], y=data_har[2:1000,1], S=S)
-mod_har$coef  %*% (c(1, tail(data_har, 1)) %>% as.numeric())
-mod_har$ols_model %*% (c(1, tail(data_har, 1)) %>% as.numeric())
+## 1min ----
+## 5 min ----
+fcasts <- readRDS("./fcasts_capire_1min.rds")
 
-### har weekly ----
-mod_har_w <- qlikeHAR(X=data_har[1:(1000-1),], y=data_har[2:1000,2], S=S)
-mod_har_w$coef 
-mod_har_w$ols_model
-mod_har_w$coef  %*% (c(1, tail(data_har, 1)) %>% as.numeric())
-mod_har_w$ols_model %*% (c(1, tail(data_har, 1)) %>% as.numeric())
+fcasts %>% 
+  filter(date>="2011-01-01", date<"2024-01-01") %>% 
+  group_by(win,model,horizon) %>% 
+  summarise(mean(time),mean(timeOLS))
 
-### har monthly ----
-mod_har_m <- qlikeHAR(X=data_har[1:(1000-1),], y=data_har[2:1000,3], S=S)
-mod_har_m$coef 
-mod_har_m$ols_model
-mod_har_m$coef  %*% (c(1, tail(data_har, 1)) %>% as.numeric())
-mod_har_m$ols_model %*% (c(1, tail(data_har, 1)) %>% as.numeric())
+fcasts %>% 
+  filter(date>="2011-01-01", date<"2024-01-01", model!="HARQ") %>% 
+  select(date, win, model, horizon, time, timeOLS) %>% 
+  pivot_longer(cols = time:timeOLS) %>% 
+  mutate(name=ifelse(name=="time","QLIKE Solution","OLS SE Solution"))%>% 
+  mutate(
+    horizon = ifelse(
+      horizon ==  "1day", 
+      "a) one-day-ahead", 
+      ifelse(
+        horizon ==  "1week", 
+        "b) one-week-ahead", 
+        "c) one-month-ahead")
+    )
+  ) %>% 
+  ggplot(aes(x=factor(win), y=(value), color=name))+
+  geom_boxplot(outlier.shape = NA, position = position_dodge(width = 0)) +
+  facet_nested(model~horizon)+
+  scale_y_log10()+
+  coord_cartesian(ylim = c(1e-4,.0225))+
+  xlab("length of estimation window")+
+  ylab("time in seconds")+
+  theme_bw()+
+  theme(
+    legend.position = "bottom", 
+    legend.title  = element_blank(), 
+    axis.text.x = element_text(angle = 45, hjust = 1)
+  )+
+  scale_color_manual(values = c("coral", "purple"))
 
-
-## harq ----
-data_harq <- data.frame(
-  #date= ymd(aapl$date),
-  rv = aapl$rv5%>% sqrt(), 
-  rvw =RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=5, fill=NA), 
-  rvm =RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=22, fill=NA),
-  rvrq = sqrt(aapl$rq5)*sqrt(aapl$rv5)
-) %>% tidyr::drop_na()
-data_harq
-
-### harq daily ----
-mod_harq <- qlikeHAR(X=data_harq[1:(1000-1),], y=data_harq[2:1000,1], S=S)
-mod_harq$coef
-mod_harq$ols_model
-mod_harq$coef  %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-mod_harq$ols_model %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-
-### harq weekly ----
-mod_harq_w <- qlikeHAR(X=data_harq[1:(1000-1),], y=data_harq[2:1000,2], S=S)
-mod_harq_w$coef 
-mod_harq_w$ols_model
-mod_harq_w$coef  %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-mod_harq_w$ols_model %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-
-### harq monthly ----
-mod_harq_m <- qlikeHAR(X=data_harq[1:(1000-1),], y=data_harq[2:1000,3], S=S)
-mod_harq_m$coef 
-mod_harq_m$ols_model
-mod_harq_m$coef  %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-mod_harq_m$ols_model %*% (c(1, tail(data_harq, 1)) %>% as.numeric())
-
-## shar ----
-data_shar<- data.frame(
-  #date= ymd(aapl$date),
-  rv = aapl$rv5%>% sqrt(), 
-  rvw =RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=5, fill=NA), 
-  rvm =RcppRoll::roll_meanr(aapl$rv5%>% sqrt(), n=22, fill=NA),
-  good = aapl$good5, 
-  bad = aapl$bad5
-) %>% tidyr::drop_na()
-data_shar
-
-### shar daily ----
-mod_shar <- qlikeHAR(X=data_shar[1:(1000-1),], y=data_shar[2:1000,1], S=S)
-mod_shar$coef
-mod_shar$ols_model
-mod_shar$coef  %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
-mod_shar$ols_model %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
-
-### shar weekly ----
-mod_harq_w <- qlikeHAR(X=data_shar[1:(1000-1),], y=data_shar[2:1000,2], S=S)
-mod_harq_w$coef 
-mod_harq_w$ols_model
-mod_harq_w$coef  %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
-mod_harq_w$ols_model %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
-
-### shar monthly ----
-mod_harq_m <- qlikeHAR(X=data_shar[1:(1000-1),], y=data_shar[2:1000,3], S=S)
-mod_harq_m$coef 
-mod_harq_m$ols_model
-mod_harq_m$coef  %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
-mod_harq_m$ols_model %*% (c(1, tail(data_shar, 1)) %>% as.numeric())
+ggsave("fig_capire_estimationtime_1min.pdf", width = 8, height = 6)
+ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_capire_estimationtime_1min.pdf", width = 8, height = 6)
