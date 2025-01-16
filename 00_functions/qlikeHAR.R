@@ -9,7 +9,7 @@ qlikeHAR <- function(X, y, S) {
   X <- as.matrix(X)
   
   # Start time
-  t_start <- Sys.time()
+  t_start_ols <- Sys.time()
   
   # Fit the model using OLS as the initial guess
   ols_model <- stats::lm(y ~ X)
@@ -17,6 +17,8 @@ qlikeHAR <- function(X, y, S) {
   # End time OLS
   t_end_ols <- Sys.time()
   
+  
+  t_start_optim <- Sys.time()
   # Initial guess for parameters from OLS
   initial_params <- coefficients(ols_model) %>% as.numeric()
   
@@ -24,7 +26,12 @@ qlikeHAR <- function(X, y, S) {
   lower_bounds <- rep(-Inf, length(initial_params))
   
   # Optimizing the loss function
-  result <- stats::optim(par = initial_params, fn = loss, X = X, y = y, S = S)
+  result <- stats::optim(
+    par = initial_params, 
+    fn = loss,
+    X = X, y = y, 
+    S = S
+    )
   
   # Extract optimal parameters
   optimal_params <- result$par
@@ -39,8 +46,8 @@ qlikeHAR <- function(X, y, S) {
   t_end <- Sys.time()
   
   # Calculate computation time in seconds
-  time_taken_ols <- as.numeric(difftime(t_end_ols, t_start, units = "secs"))
-  time_taken <- as.numeric(difftime(t_end, t_start, units = "secs"))
+  time_taken_ols <- as.numeric(difftime(t_end_ols, t_start_ols, units = "secs"))
+  time_taken <- as.numeric(difftime(t_end, t_start_optim, units = "secs"))
   
   return(
     list(
