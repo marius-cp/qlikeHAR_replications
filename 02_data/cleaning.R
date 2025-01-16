@@ -123,7 +123,7 @@ rq <- left_join(rq1min,rq5min)
 
 ## good
 good1min <- read_excel(file_path, sheet = "Good", col_names = FALSE) 
-good5min <- read_excel(file_path, sheet = "Good", col_names = FALSE) 
+good5min <- read_excel(file_path, sheet = "Good_5", col_names = FALSE) 
 colnames(good1min) <- companies %>% pull(`...1`)
 colnames(good5min) <- companies %>% pull(`...1`)
 
@@ -159,7 +159,7 @@ good <- left_join(good1min,good5min)
 
 ## bad
 bad1min <- read_excel(file_path, sheet = "Bad", col_names = FALSE) 
-bad5min <- read_excel(file_path, sheet = "Bad", col_names = FALSE) 
+bad5min <- read_excel(file_path, sheet = "Bad_5", col_names = FALSE) 
 colnames(bad1min) <- companies %>% pull(`...1`)
 colnames(bad5min) <- companies %>% pull(`...1`)
 
