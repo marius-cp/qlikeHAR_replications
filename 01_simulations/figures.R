@@ -6,7 +6,11 @@ library(ggh4x)
 files <- list.files()
 files_subset_DMW <- files[startsWith(files, "DMW_results_individual")] # 12 ohne v2
 
+list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -1.386)
+list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-1.386.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -1.386)
 
+
+"DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds"
 # List of files to read, with associated parameters
 file_list <- list(
   list(file = "DMW_results_individual_SV1FJ_M78_lam0.118_sig1_alpha-0.1.rds", M = 78, lambda = 0.118, sigma = 1, alpha = -0.1),
@@ -19,6 +23,8 @@ file_list <- list(
   list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig2_alpha-0.1.rds", M = 78, lambda = 0.058, sigma = 2, alpha = -0.1),
   list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -0.1),
   list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig2_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 2, alpha = -0.1),
+  list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -1.386),
+  list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-1.386.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -1.386),
   list(file = "DMW_results_individual_SV2F_M78.rds", M = 78, lambda = NA, sigma = NA, alpha = NA),
   list(file = "DMW_results_individual_SV2F_M390.rds", M = 390, lambda = NA, sigma = NA, alpha = NA)
 )
@@ -61,14 +67,17 @@ labels <-
         expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058, alpha == -0.00137 )) ),
         expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058, alpha == -0.00137 )) ),
         
-        expression(plain(SV1FJ) ~ (list(alpha == -0.1 )) ),
-        expression(plain(SV1FJ) ~ (list(alpha == -0.1 )) ),
+        expression(plain(SV1F) ~ (list(alpha == -0.1 )) ),
+        expression(plain(SV1F) ~ (list(alpha == -0.1 )) ),
         
         expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058,  alpha == -0.1 ))  ),
         expression(plain(SV1FJ) ~ (list(sigma == 2, lambda == 0.058,  alpha == -0.1 ))  ),
         
-        expression(plain(SV1FJ) ~ (list(sigma == 1 ~ lambda == 0.058, alpha == -0.1 )) ),
-        expression(plain(SV1FJ) ~ (list(sigma == 2 ~ lambda == 0.058, alpha == -0.1 )) ), 
+        expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058, alpha == -0.1 )) ),
+        expression(plain(SV1FJ) ~ (list(sigma == 2, lambda == 0.058, alpha == -0.1 )) ), 
+        
+        expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058, alpha == -1.386 )) ),
+        expression(plain(SV1FJ) ~ (list(sigma == 1, lambda == 0.058, alpha == -1.386 )) ), 
         
         expression( plain(SV2F) ),
         expression( plain(SV2F) )

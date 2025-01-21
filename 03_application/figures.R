@@ -71,6 +71,8 @@ results <- losses %>%
 
 results
 
+results5min <- results
+
 
 paneldmw_ <- 
   losses %>%
@@ -302,7 +304,7 @@ results <- losses %>%
 
 results
 
-
+results1min <- results
 
 results %>% 
   mutate(
@@ -500,6 +502,43 @@ ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_ca
 
 # summarize table----
 
+results_individual <- 
+  bind_rows(
+    results5min %>% mutate(proxy = "5min"),
+    results1min %>% mutate(proxy = "1min")
+  )
+
+## qlike ----
+results_individual  %>% 
+  group_by(
+    #horizon, 
+    model,
+    proxy
+  ) %>% 
+  summarise(
+    n=n(),
+    win = mean(as.numeric(qlike_statistic<=0)), 
+    sigwin5 = mean(as.numeric(qlike_statistic<=-1.96)),
+    loss = mean(as.numeric(qlike_statistic>=0)), 
+    sigloss5 = mean(as.numeric(qlike_statistic>=1.96)),
+  ) %>% arrange(model,proxy)
+
+## mse ----
+results_individual  %>% 
+  group_by(
+    #horizon, 
+    model,
+    proxy
+  ) %>% 
+  summarise(
+    n=n(),
+    win = mean(as.numeric(mse_statistic<=0)), 
+    sigwin5 = mean(as.numeric(mse_statistic<=-1.96)),
+    loss = mean(as.numeric(mse_statistic>=0)), 
+    sigloss5 = mean(as.numeric(mse_statistic>=1.96)),
+  ) %>% arrange(model,proxy)
+
+
 # time ----
 
 # comp time ----
@@ -545,7 +584,6 @@ fcasts %>%
 
 ggsave("fig_capire_estimationtime_5min.pdf", width = 8, height = 6)
 ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_capire_estimationtime_5min.pdf", width = 8, height = 6)
-
 
 ## 1 min ----
 fcasts <- readRDS("./fcasts_capire_1min_rvola.rds")
