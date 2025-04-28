@@ -1,3 +1,7 @@
+---
+output: github_document
+---
+
 # Replication package for "Coherent Forecasting of Realized Volatility"
 
 
