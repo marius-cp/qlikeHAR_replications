@@ -6,27 +6,24 @@ library(ggh4x)
 files <- list.files()
 files_subset_DMW <- files[startsWith(files, "DMW_results_individual")] # 12 ohne v2
 
-list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -1.386)
-list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-1.386.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -1.386)
 
 
-"DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds"
 # List of files to read, with associated parameters
 file_list <- list(
-  list(file = "DMW_results_individual_SV1FJ_M78_lam0.118_sig1_alpha-0.1.rds", M = 78, lambda = 0.118, sigma = 1, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M390_lam0.118_sig1_alpha-0.1.rds", M = 390, lambda = 0.118, sigma = 1, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-0.00137.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -0.00137),
-  list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-0.00137.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -0.00137),
-  list(file = "DMW_results_individual_SV1F_M78_alpha-0.1.rds", M = 78, lambda = NA, sigma = NA, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1F_M390_alpha-0.1.rds", M = 390, lambda = NA, sigma = NA, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-0.1.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig2_alpha-0.1.rds", M = 78, lambda = 0.058, sigma = 2, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig2_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 2, alpha = -0.1),
-  list(file = "DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -1.386),
-  list(file = "DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-1.386.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -1.386),
-  list(file = "DMW_results_individual_SV2F_M78.rds", M = 78, lambda = NA, sigma = NA, alpha = NA),
-  list(file = "DMW_results_individual_SV2F_M390.rds", M = 390, lambda = NA, sigma = NA, alpha = NA)
+  list(file = "results/DMW_results_individual_SV1FJ_M78_lam0.118_sig1_alpha-0.1.rds", M = 78, lambda = 0.118, sigma = 1, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M390_lam0.118_sig1_alpha-0.1.rds", M = 390, lambda = 0.118, sigma = 1, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-0.00137.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -0.00137),
+  list(file = "results/DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-0.00137.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -0.00137),
+  list(file = "results/DMW_results_individual_SV1F_M78_alpha-0.1.rds", M = 78, lambda = NA, sigma = NA, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1F_M390_alpha-0.1.rds", M = 390, lambda = NA, sigma = NA, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-0.1.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M78_lam0.058_sig2_alpha-0.1.rds", M = 78, lambda = 0.058, sigma = 2, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M390_lam0.058_sig2_alpha-0.1.rds", M = 390, lambda = 0.058, sigma = 2, alpha = -0.1),
+  list(file = "results/DMW_results_individual_SV1FJ_M390_lam0.058_sig1_alpha-1.386.rds", M = 390, lambda = 0.058, sigma = 1, alpha = -1.386),
+  list(file = "results/DMW_results_individual_SV1FJ_M78_lam0.058_sig1_alpha-1.386.rds", M = 78, lambda = 0.058, sigma = 1, alpha = -1.386),
+  list(file = "results/DMW_results_individual_SV2F_M78.rds", M = 78, lambda = NA, sigma = NA, alpha = NA),
+  list(file = "results/DMW_results_individual_SV2F_M390.rds", M = 390, lambda = NA, sigma = NA, alpha = NA)
 )
 
 
@@ -208,7 +205,7 @@ plotdata %>%
     mapping = aes(y=(symbol), x=factor(win)),
     shape="+", color="black"
   )+
-  geom_hline(yintercept = 1.5, linetype = "solid", color = "black")+
+ # geom_hline(yintercept = 1.5, linetype = "solid", color = "black")+
   scale_y_discrete(labels = function(x) parse(text = x)) +
   ylab(element_blank())+
   theme(
@@ -244,4 +241,4 @@ plotdata %>%
 
 ggsave("fig_sim_results.pdf", width = 12, height = 10)
 ggsave("/Users/mp/Library/CloudStorage/Dropbox/Apps/Overleaf/qlikeHAR/fig/fig_sim_results.pdf", width = 12, height = 10)
-
+ 
