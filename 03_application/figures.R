@@ -33,6 +33,7 @@ negvola <-
       unique()
   ) %>% sort()
 
+
 losses <- 
   fcasts %>% 
   filter(
@@ -539,9 +540,7 @@ results_individual  %>%
   ) %>% arrange(model,proxy)
 
 
-# time ----
-
-# comp time ----
+# comp. time ----
 
 ## 5 min ----
 fcasts <- readRDS("./fcasts_capire_5min_rvola.rds")
